@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pseudocode Interpreter</title>
+  <meta name="description" content="Pseudocode Interpreter für IHK-Pseudocode – direkt im Browser schreiben, prüfen und ausführen.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f6fde'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3E:=%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">:=</span>
+      <h1>Pseudocode Interpreter</h1>
+      <span class="version" title="Version 1">V1</span>
+    </div>
+
+    <nav class="toolbar" aria-label="Werkzeugleiste">
+      <div class="group">
+        <button type="button" id="btn-new" title="Neues Programm (Strg+Alt+N)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></svg>
+          <span>Neu</span>
+        </button>
+        <button type="button" id="btn-open" title="Datei öffnen (Strg+O)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>
+          <span>Öffnen</span>
+        </button>
+        <button type="button" id="btn-save" title="Speichern (Strg+S)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>
+          <span>Speichern</span>
+        </button>
+      </div>
+      <div class="group">
+        <button type="button" id="btn-check" title="Syntax prüfen (F7)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          <span>Syntaxcheck</span>
+        </button>
+        <button type="button" id="btn-run" class="primary" title="Programm ausführen (F5 oder Strg+Enter)">
+          <svg class="icon-run" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+          <svg class="icon-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+          <span class="label">Run</span>
+        </button>
+      </div>
+      <div class="group">
+        <button type="button" id="btn-syntax" title="Syntax-Übersicht öffnen (F1)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h9a5 5 0 0 1 5 5v11H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>
+          <span>Syntax</span>
+        </button>
+      </div>
+    </nav>
+    <input type="file" id="file-input" accept=".pseudo,.pc,.txt,text/plain" hidden>
+  </header>
+
+  <main class="split" id="split">
+    <section class="pane editor-pane" aria-label="Quellcode">
+      <div class="pane-head">
+        <span class="pane-title">Quellcode</span>
+        <span class="filename" id="filename">unbenannt.pseudo</span>
+      </div>
+      <div class="editor" id="editor">
+        <div class="gutter" aria-hidden="true"><div class="gutter-inner" id="gutter"></div></div>
+        <div class="code-area" id="code-area">
+          <div class="line-marker" id="line-marker" hidden></div>
+          <pre class="highlight" id="highlight" aria-hidden="true"></pre>
+          <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+                    wrap="off" aria-label="Pseudocode-Quelltext"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" id="divider" role="separator" aria-orientation="vertical"
+         aria-label="Breite der Bereiche ändern" tabindex="0"></div>
+
+    <section class="pane io-pane" aria-label="Ein- und Ausgabe">
+      <div class="pane-head">
+        <span class="pane-title">Ein- und Ausgabe</span>
+        <span class="run-state" id="run-state"></span>
+        <button type="button" class="ghost small" id="btn-clear" title="Ausgabe leeren">Leeren</button>
+      </div>
+      <div class="console" id="console" role="log" aria-live="polite" tabindex="0"></div>
+      <form class="input-row" id="input-form" autocomplete="off">
+        <span class="input-caret" aria-hidden="true">›</span>
+        <input id="input" type="text" disabled placeholder="Eingabe ist aktiv, sobald das Programm eingabe(…) aufruft"
+               aria-label="Eingabe für das Programm">
+        <button type="submit" id="btn-send" disabled>Senden</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="statusbar">
+    <span id="status">Bereit</span>
+    <span id="cursor">Zeile 1, Spalte 1</span>
+  </footer>
+
+  <dialog id="syntax-dialog" aria-labelledby="syntax-title">
+    <div class="dialog-head">
+      <h2 id="syntax-title">Syntax-Übersicht</h2>
+      <button type="button" class="ghost icon-btn" id="btn-syntax-close" aria-label="Schließen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="dialog-body" id="syntax-body">
+
+      <section>
+        <h3>Variablen &amp; Ausgabe</h3>
+        <p>Zuweisungen schreibt man mit <code>:=</code>. Kommentare beginnen mit <code>//</code>.
+          Das Wort <code>sei</code> vor einer Zuweisung ist erlaubt, aber nicht nötig.</p>
+        <pre class="example">x    := 42
+pi   := 3.14
+name := "PseudoCode"
+
+ausgabe(x)
+ausgabe("Wert: " + text(x))</pre>
+      </section>
+
+      <section>
+        <h3>Eingabe</h3>
+        <p><code>eingabe(…)</code> liefert immer eine Zeichenkette. Mit <code>zahl(…)</code> wird daraus eine Zahl.
+          Hier im Interpreter tippst du die Eingabe rechts unten ein.</p>
+        <pre class="example">name  := eingabe("Wie heißt du? ")
+alter := zahl(eingabe("Wie alt bist du? "))
+ausgabe("Hallo " + name + ", nächstes Jahr bist du " + text(alter + 1))</pre>
+      </section>
+
+      <section>
+        <h3>Bedingungen</h3>
+        <pre class="example">wenn x &gt; 10 dann
+    ausgabe("groß")
+sonstwenn x = 10 dann
+    ausgabe("genau zehn")
+sonst
+    ausgabe("klein")
+endewenn</pre>
+      </section>
+
+      <section>
+        <h3>Schleifen</h3>
+        <pre class="example">// Solange-Schleife
+solange x &gt; 0 tue
+    ausgabe(x)
+    x := x - 1
+endesolange
+
+// Zählschleife (C-Stil)
+fuer i := 0; i &lt; 5; i++ tue
+    ausgabe(i)
+endefuer
+
+// Bereichsschleife (Ende inklusive), Schrittweite optional
+fuer i von 1 bis 10 schrittweite 2 tue
+    ausgabe(i)
+endefuer</pre>
+      </section>
+
+      <section>
+        <h3>Funktionen</h3>
+        <pre class="example">funktion addiere(a, b)
+    rueckgabe a + b
+endefunktion
+
+ergebnis := addiere(3, 4)
+ausgabe(ergebnis)   // 7</pre>
+        <p>Funktionen dürfen vor oder nach ihrem Aufruf definiert werden und sich selbst aufrufen (Rekursion).</p>
+      </section>
+
+      <section>
+        <h3>Listen</h3>
+        <p>Indizes beginnen bei <code>0</code>.</p>
+        <pre class="example">zahlen := liste(10, 3, 7)
+zahlen.hinzufuegen(42)
+zahlen[0] := 99
+ausgabe(zahlen[0])          // 99
+ausgabe(laenge(zahlen))     // 4
+zahlen.sortieren()
+letzter := zahlen.pop()</pre>
+        <table>
+          <thead><tr><th>Methode</th><th>Wirkung</th></tr></thead>
+          <tbody>
+            <tr><td><code>hinzufuegen(wert)</code></td><td>Wert ans Ende anhängen</td></tr>
+            <tr><td><code>entfernen(index)</code></td><td>Element an Position entfernen</td></tr>
+            <tr><td><code>einfuegen(index, wert)</code></td><td>Wert an Position einfügen</td></tr>
+            <tr><td><code>pop()</code></td><td>letztes Element entfernen und zurückgeben</td></tr>
+            <tr><td><code>sortieren()</code></td><td>aufsteigend sortieren (nur Zahlen oder nur Texte)</td></tr>
+            <tr><td><code>umkehren()</code></td><td>Reihenfolge umdrehen</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h3>2D-Listen (Matrizen)</h3>
+        <pre class="example">matrix := liste(
+    liste(1, 2, 3),
+    liste(4, 5, 6)
+)
+ausgabe(matrix[0][1])   // 2
+matrix[1][2] := 99</pre>
+      </section>
+
+      <section>
+        <h3>Eingebaute Funktionen</h3>
+        <table>
+          <thead><tr><th>Funktion</th><th>Ergebnis</th><th>Beschreibung</th></tr></thead>
+          <tbody>
+            <tr><td><code>ausgabe(wert)</code></td><td>–</td><td>Wert ausgeben</td></tr>
+            <tr><td><code>eingabe(text?)</code></td><td>Zeichenkette</td><td>Eine Zeile einlesen</td></tr>
+            <tr><td><code>text(wert)</code></td><td>Zeichenkette</td><td>Wert als Text</td></tr>
+            <tr><td><code>zahl(wert)</code></td><td>Zahl</td><td>Text in Zahl umwandeln</td></tr>
+            <tr><td><code>datentyp(wert)</code></td><td>Zeichenkette</td><td><code>"zahl"</code>, <code>"zeichenkette"</code>, <code>"wahrheitswert"</code>, <code>"liste"</code>, <code>"nichts"</code></td></tr>
+            <tr><td><code>laenge(wert)</code></td><td>Zahl</td><td>Länge einer Zeichenkette oder Liste</td></tr>
+            <tr><td><code>abs(n)</code></td><td>Zahl</td><td>Betrag</td></tr>
+            <tr><td><code>runden(n)</code></td><td>Zahl</td><td>Kaufmännisch runden</td></tr>
+            <tr><td><code>boden(n)</code></td><td>Zahl</td><td>Abrunden</td></tr>
+            <tr><td><code>decke(n)</code></td><td>Zahl</td><td>Aufrunden</td></tr>
+            <tr><td><code>wurzel(n)</code></td><td>Zahl</td><td>Quadratwurzel</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h3>Operatoren &amp; Schlüsselwörter</h3>
+        <table>
+          <thead><tr><th>Pseudocode</th><th>Bedeutung</th></tr></thead>
+          <tbody>
+            <tr><td><code>:=</code></td><td>Zuweisung</td></tr>
+            <tr><td><code>=</code> &nbsp; <code>!=</code></td><td>gleich, ungleich</td></tr>
+            <tr><td><code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td><td>Vergleiche</td></tr>
+            <tr><td><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code></td><td>Rechnen, <code>%</code> = Rest der Division; <code>+</code> verbindet auch Texte</td></tr>
+            <tr><td><code>und</code> <code>oder</code> <code>nicht</code></td><td>Logische Verknüpfungen</td></tr>
+            <tr><td><code>wahr</code> <code>falsch</code></td><td>Wahrheitswerte</td></tr>
+            <tr><td><code>i++</code> <code>i--</code></td><td>um 1 erhöhen / verringern</td></tr>
+            <tr><td><code>wenn … dann … sonstwenn … sonst … endewenn</code></td><td>Verzweigung</td></tr>
+            <tr><td><code>solange … tue … endesolange</code></td><td>Kopfgesteuerte Schleife</td></tr>
+            <tr><td><code>fuer … tue … endefuer</code></td><td>Zählschleife (C-Stil oder <code>von … bis … schrittweite</code>)</td></tr>
+            <tr><td><code>funktion … endefunktion</code>, <code>rueckgabe</code></td><td>Funktion mit Rückgabewert</td></tr>
+          </tbody>
+        </table>
+        <p class="hint"><code>ende</code> funktioniert als universelles Blockende. Statt <code>fuer</code>, <code>rueckgabe</code>,
+          <code>laenge</code>, <code>hinzufuegen</code> und <code>einfuegen</code> dürfen auch die Schreibweisen mit Umlaut verwendet werden.</p>
+      </section>
+
+      <p class="credit">Syntax nach <a href="https://github.com/danycagiva/Pseudocode#syntax" target="_blank" rel="noopener">danycagiva/Pseudocode</a>.
+        Tipp: Ein Klick auf „Übernehmen“ fügt ein Beispiel an der Cursorposition in den Editor ein.</p>
+    </div>
+  </dialog>
+
+  <script src="js/interpreter.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
