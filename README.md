@@ -1,4 +1,4 @@
-# Pseudocode Interpreter – V1
+# Pseudocode Interpreter – V2
 
 Ein Interpreter für **IHK-Pseudocode**, der komplett im Browser läuft. Gedacht zum Üben für die
 Abschlussprüfung zum Fachinformatiker: Programm links schreiben, rechts Ein- und Ausgabe sehen.
