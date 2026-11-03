@@ -68,6 +68,8 @@ Methoden sowie die eingebauten Funktionen `ausgabe`, `eingabe`, `text`, `zahl`, 
 
 Kleine Ergänzungen gegenüber dem Original:
 
+- `**` berechnet Potenzen, z. B. `2 ** n` (rechtsassoziativ, `-2 ** 2` ergibt `-4`).
+- Für den Vergleich ist neben `=` auch `==` erlaubt.
 - `i++` und `i--` sind auch als eigene Anweisung erlaubt, nicht nur im Kopf einer `fuer`-Schleife.
 - Der Syntaxcheck meldet falsche Blockenden (z. B. `endesolange` für einen `wenn`-Block),
   unbekannte Funktionen, falsche Argumentanzahl und `=` statt `:=`.

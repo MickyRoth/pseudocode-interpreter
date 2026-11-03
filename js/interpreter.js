@@ -132,7 +132,11 @@
           else fail("Unbekanntes Zeichen ':' – meintest du ':='?", tl, tc);
           break;
         case '←': push('ZUWEISUNG', ':=', tl, tc); break;
-        case '=': push('OP', '=', tl, tc); break;
+        case '=':
+          // '==' ist als Schreibweise für den Vergleich '=' erlaubt
+          if (peek() === '=') { advance(); push('OP', '==', tl, tc); }
+          else push('OP', '=', tl, tc);
+          break;
         case '≠': push('OP', '!=', tl, tc); break;
         case '≤': push('OP', '<=', tl, tc); break;
         case '≥': push('OP', '>=', tl, tc); break;
@@ -153,7 +157,11 @@
           if (peek() === '-') { advance(); push('MINUSMINUS', '--', tl, tc); }
           else push('OP', '-', tl, tc);
           break;
-        case '*': case '/': case '%':
+        case '*':
+          if (peek() === '*') { advance(); push('OP', '**', tl, tc); }
+          else push('OP', '*', tl, tc);
+          break;
+        case '/': case '%':
           push('OP', c, tl, tc); break;
         case '(': push('LPAREN', c, tl, tc); break;
         case ')': push('RPAREN', c, tl, tc); break;
@@ -280,7 +288,7 @@
         return { type: 'ExprStmt', expr, line: start.line, col: start.col };
       }
       if (expr.type === 'Binary' && expr.op === '=') {
-        throw this.error("'=' ist ein Vergleich. Für eine Zuweisung bitte ':=' verwenden", expr);
+        throw this.error("'" + expr.symbol + "' ist ein Vergleich. Für eine Zuweisung bitte ':=' verwenden", expr);
       }
       throw this.error('Ausdruck ohne Wirkung – erwartet wird eine Anweisung (z. B. Zuweisung mit \':=\')', start);
     }
@@ -453,9 +461,10 @@
 
     parseComparison() {
       let left = this.parseAdditive();
-      while (this.is('OP') && ['=', '!=', '<', '>', '<=', '>='].includes(this.cur.value)) {
+      while (this.is('OP') && ['=', '==', '!=', '<', '>', '<=', '>='].includes(this.cur.value)) {
         const t = this.next();
-        left = { type: 'Binary', op: t.value, left, right: this.parseAdditive(), line: t.line, col: t.col };
+        const op = t.value === '==' ? '=' : t.value;
+        left = { type: 'Binary', op, symbol: t.value, left, right: this.parseAdditive(), line: t.line, col: t.col };
       }
       return left;
     }
@@ -487,7 +496,16 @@
         const t = this.next();
         return { type: 'Unary', op: 'nicht', operand: this.parseUnary(), line: t.line, col: t.col };
       }
-      return this.parsePostfix(this.parsePrimary());
+      return this.parsePower();
+    }
+
+    // Potenz bindet stärker als ein Vorzeichen links davon (-2 ** 2 = -4)
+    // und ist rechtsassoziativ (2 ** 3 ** 2 = 2 ** 9).
+    parsePower() {
+      const base = this.parsePostfix(this.parsePrimary());
+      if (!this.is('OP', '**')) return base;
+      const t = this.next();
+      return { type: 'Binary', op: '**', left: base, right: this.parseUnary(), line: t.line, col: t.col };
     }
 
     parsePrimary() {
@@ -925,6 +943,11 @@
         case '+': return l + r;
         case '-': return l - r;
         case '*': return l * r;
+        case '**': {
+          const p = Math.pow(l, r);
+          if (Number.isNaN(p)) throw this.error('Potenz ist nicht definiert (negative Basis mit gebrochenem Exponenten)', e);
+          return p;
+        }
         case '/':
           if (r === 0) throw this.error('Division durch Null', e);
           return l / r;
