@@ -6,8 +6,12 @@
   <title>Pseudocode Interpreter</title>
   <meta name="description" content="Pseudocode Interpreter für IHK-Pseudocode – direkt im Browser schreiben, prüfen und ausführen.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f6fde'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' font-weight='700' fill='white' text-anchor='middle'%3E:=%3C/text%3E%3C/svg%3E">
-  <!-- ?v=… bei jeder neuen Version erhöhen, damit Browser keine alten Dateien aus dem Cache mischen -->
-  <link rel="stylesheet" href="css/style.css?v=2.1">
+  <script>
+    // Cache-Version: bei jeder Änderung an CSS oder JS erhöhen, damit Browser keine alten
+    // Dateien aus dem Cache mischen. Sie wird an alle eingebundenen Dateien angehängt.
+    var ASSET_VERSION = '2.3';
+    document.write('<link rel="stylesheet" href="css/style.css?v=' + ASSET_VERSION + '">');
+  </script>
 </head>
 <body>
   <header class="topbar">
@@ -106,7 +110,8 @@
       <section>
         <h3>Variablen &amp; Ausgabe</h3>
         <p>Zuweisungen schreibt man mit <code>:=</code>. Kommentare beginnen mit <code>//</code>.
-          Das Wort <code>sei</code> vor einer Zuweisung ist erlaubt, aber nicht nötig.</p>
+          Das Wort <code>sei</code> vor einer Zuweisung ist erlaubt, aber nicht nötig.
+          Jede Anweisung steht in einer eigenen Zeile.</p>
         <pre class="example">x    := 42
 pi   := 3.14
 name := "PseudoCode"
@@ -238,7 +243,9 @@ matrix[1][2] := 99</pre>
           </tbody>
         </table>
         <p class="hint"><code>ende</code> funktioniert als universelles Blockende. Statt <code>fuer</code>, <code>rueckgabe</code>,
-          <code>laenge</code>, <code>hinzufuegen</code> und <code>einfuegen</code> dürfen auch die Schreibweisen mit Umlaut verwendet werden.</p>
+          <code>laenge</code>, <code>hinzufuegen</code> und <code>einfuegen</code> dürfen auch die Schreibweisen mit Umlaut verwendet werden.
+          Groß- und Kleinschreibung spielt keine Rolle: <code>WENN</code> und <code>wenn</code> sind gleich,
+          ebenso die Variablen <code>Zaehler</code> und <code>zaehler</code>.</p>
       </section>
 
       <p class="credit">Syntax nach <a href="https://github.com/danycagiva/Pseudocode#syntax" target="_blank" rel="noopener">danycagiva/Pseudocode</a>.
@@ -246,7 +253,9 @@ matrix[1][2] := 99</pre>
     </div>
   </dialog>
 
-  <script src="js/interpreter.js?v=2.1"></script>
-  <script src="js/app.js?v=2.1"></script>
+  <script>
+    document.write('<script src="js/interpreter.js?v=' + ASSET_VERSION + '"><\/script>' +
+                   '<script src="js/app.js?v=' + ASSET_VERSION + '"><\/script>');
+  </script>
 </body>
 </html>

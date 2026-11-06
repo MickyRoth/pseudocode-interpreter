@@ -86,7 +86,7 @@ endefuer
       else if (m[3]) cls = 'num';
       else if (m[5]) cls = 'op';
       else {
-        const w = m[4];
+        const w = m[4].toLowerCase(); // Groß-/Kleinschreibung spielt keine Rolle
         if (VALUE_WORDS.has(w)) cls = 'val';
         else if (P.KEYWORDS[w]) cls = 'kw';
         else if (P.BUILTINS[w] || P.METHODS[w]) cls = 'fn';
@@ -204,7 +204,7 @@ endefuer
     code.setSelectionRange(start, start + changed.length);
   }
 
-  const OPENS_BLOCK = /^\s*(funktion\b.*|.*\b(dann|tue)\s*|sonst\s*)(\/\/.*)?$/;
+  const OPENS_BLOCK = /^\s*(funktion\b.*|.*\b(dann|tue)\s*|sonst\s*)(\/\/.*)?$/i;
 
   function handleEnter() {
     autoOutdent();
@@ -217,7 +217,7 @@ endefuer
   }
 
   // Zeilen mit "ende…", "sonst" oder "sonstwenn" beim Enter automatisch ausrücken.
-  const CLOSES_BLOCK = /^[ \t]+((ende|endewenn|endesolange|endefuer|endefür|endefunktion|sonst)\s*(\/\/.*)?|sonstwenn\b.*)$/;
+  const CLOSES_BLOCK = /^[ \t]+((ende|endewenn|endesolange|endefuer|endefür|endefunktion|sonst)\s*(\/\/.*)?|sonstwenn\b.*)$/i;
 
   function autoOutdent() {
     const v = code.value;

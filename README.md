@@ -72,10 +72,17 @@ Kleine Ergänzungen gegenüber dem Original:
 - Für den Vergleich ist neben `=` auch `==` erlaubt.
 - `i++` und `i--` sind auch als eigene Anweisung erlaubt, nicht nur im Kopf einer `fuer`-Schleife.
 - Der Syntaxcheck meldet falsche Blockenden (z. B. `endesolange` für einen `wenn`-Block),
-  unbekannte Funktionen, falsche Argumentanzahl und `=` statt `:=`.
+  unbekannte Funktionen und Variablen (mit Vorschlag bei Tippfehlern, z. B. „meintest du
+  'zaehler'?“), falsche Argumentanzahl und `=` statt `:=`.
+- Jede Anweisung steht in einer eigenen Zeile; nur ein Blockende darf noch in derselben Zeile
+  folgen. Ausdrücke dürfen über mehrere Zeilen gehen. Ein `rueckgabe` ohne Wert in derselben
+  Zeile ist eine leere Rückgabe.
 - Zeichenketten lassen sich mit `<`, `>` vergleichen und mit `[i]` einzelne Zeichen lesen.
 - `zahl("3,5")` akzeptiert auch ein Komma als Dezimaltrennzeichen.
 - Schreibweisen mit Umlaut (`für`, `rückgabe`, `länge`, `hinzufügen`, `einfügen`) sind erlaubt.
+- Groß- und Kleinschreibung spielt keine Rolle, weder bei Schlüsselwörtern (`WENN`, `Wenn`, `wenn`)
+  noch bei Namen von Variablen und Funktionen (`Zaehler` und `zaehler` sind dieselbe Variable).
+  Schlüsselwörter können daher in keiner Schreibweise als Name verwendet werden (z. B. `Liste`).
 
 ## Aufbau
 
@@ -84,4 +91,21 @@ index.html          Seite mit Editor, Ein-/Ausgabe und Syntax-Popup
 css/style.css       Layout, Farben (hell/dunkel)
 js/interpreter.js   Lexer → Parser (AST) → Tree-Walking-Interpreter
 js/app.js           Editor, Dateien, Konsole, Ausführung
+test/               Tests für den Sprachkern (Node.js)
 ```
+
+## Tests
+
+Für die Tests wird nur [Node.js](https://nodejs.org) (ab Version 18) gebraucht:
+
+```bash
+node --test
+```
+
+Geprüft werden Sprache, Fehlermeldungen, das Startbeispiel und alle Beispiele der Syntax-Übersicht.
+
+## Neue Version
+
+Nach Änderungen an CSS oder JavaScript die Cache-Version `ASSET_VERSION` oben in `index.html`
+erhöhen. Sie wird an alle eingebundenen Dateien angehängt, damit Browser keine alten Dateien aus
+dem Cache verwenden.
