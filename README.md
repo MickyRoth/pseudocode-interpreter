@@ -106,6 +106,6 @@ Geprüft werden Sprache, Fehlermeldungen, das Startbeispiel und alle Beispiele d
 
 ## Neue Version
 
-Nach Änderungen an CSS oder JavaScript die Cache-Version `ASSET_VERSION` oben in `index.html`
-erhöhen. Sie wird an alle eingebundenen Dateien angehängt, damit Browser keine alten Dateien aus
-dem Cache verwenden.
+Die Versionsnummer steht nur an einer Stelle: `APP_VERSION` oben in `index.html`. Sie wird oben in
+der Leiste angezeigt (z. B. „V2.3“) und an alle eingebundenen Dateien angehängt, damit Browser keine
+alten Dateien aus dem Cache verwenden. Nach Änderungen an CSS oder JavaScript daher erhöhen.
